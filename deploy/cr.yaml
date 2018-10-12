@@ -2,3 +2,19 @@ apiVersion: "cloud.google.com/v1alpha1"
 kind: "Instance"
 metadata:
   name: "example"
+spec:
+  projectID: pgtm-pczarkowski
+  instance:
+    zone: us-central1-a
+    name: test
+    description: test instance
+    machineType: https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/zones/us-central1-a/machineTypes/custom-2-4096
+    disks:
+      - type: PERSISTENT
+        boot: true
+        AutoDelete: true
+        initializeParams:
+          diskName: root
+          sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20140606
+    networkInterfaces:
+      - network: https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/global/networks/default
