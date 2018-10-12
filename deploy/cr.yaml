@@ -3,18 +3,18 @@ kind: "Instance"
 metadata:
   name: "example"
 spec:
-  projectID: pgtm-pczarkowski
+  projectID: <GCP-PROJECT-ID>
   instance:
     zone: us-central1-a
     name: test
     description: test instance
-    machineType: https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/zones/us-central1-a/machineTypes/custom-2-4096
+    machineType: https://www.googleapis.com/compute/v1/projects/<GCP-PROJECT-ID>/zones/us-central1-a/machineTypes/custom-2-4096
     disks:
       - type: PERSISTENT
         boot: true
-        AutoDelete: true
+        autoDelete: true
         initializeParams:
-          diskName: root
+          diskName: example-root
           sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20140606
     networkInterfaces:
-      - network: https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/global/networks/default
+      - network: https://www.googleapis.com/compute/v1/projects/<GCP-PROJECT-ID>/global/networks/default

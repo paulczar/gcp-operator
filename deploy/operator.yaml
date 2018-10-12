@@ -15,7 +15,7 @@ spec:
       serviceAccountName: gcp-operator
       containers:
         - name: gcp-operator
-          image: REPLACE_IMAGE
+          image: paulczar/gcp-operator
           ports:
           - containerPort: 60000
             name: metrics
@@ -28,4 +28,14 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: OPERATOR_NAME
-              value: "gcp-operator"
+              value: gcp-operator
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /etc/secret/google.json
+          volumeMounts:
+            - name: google-credentials
+              mountPath: /etc/secret/google.json
+              subPath: google.json
+      volumes:
+      - name: google-credentials
+        secret:
+          secretName: gcp-operator
