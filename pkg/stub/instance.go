@@ -13,7 +13,7 @@ func deleteInstance(project string, instance compute.Instance) error {
 		panic(err)
 	}
 	//spew.Dump(cr)
-	return client.Delete(instance)
+	return client.InstanceDelete(instance)
 }
 
 func newInstance(project string, instance compute.Instance) (*compute.Instance, error) {
@@ -23,7 +23,7 @@ func newInstance(project string, instance compute.Instance) (*compute.Instance, 
 		return nil, err
 	}
 	// check if instance aleady exists before trying to create it
-	i, err := client.Get(instance)
+	i, err := client.InstanceGet(instance)
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +33,6 @@ func newInstance(project string, instance compute.Instance) (*compute.Instance, 
 
 	// create instance
 	logrus.Printf("Creating new instance %s", instance.Name)
-	err = client.Create(instance)
+	err = client.InstanceCreate(instance)
 	return &instance, err
 }

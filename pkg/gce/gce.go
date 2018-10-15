@@ -11,8 +11,16 @@ import (
 type GCEClient struct {
 	service   *compute.Service
 	projectID string
-	request   *compute.Instance
+	//request   *compute.Instance
+	//payload   map[string]interface{}
 }
+
+/*
+err = ms.Decode(o.Spec.Payload, &address)
+if err != nil {
+	panic(err)
+}
+*/
 
 // CreateGCECloud creates a new instance of GCECloud.
 func New(project string) (*GCEClient, error) {

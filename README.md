@@ -27,12 +27,14 @@ kubectl -n gcp-operator apply -f deploy/crd.yaml
 kubectl -n gcp-operator apply -f deploy/operator.yaml
 ```
 
-Edit `deploy/cr.yaml` replacing the project ID placeholders with your GCP project.
+### Create GCP Instance
+
+Edit `deploy/cr-instance.yaml` replacing the project ID placeholders with your GCP project.
 
 Once the GCP Operator is deployed you can create a GCP instance:
 
 ```bash
-kubectl -n gcp-operator apply -f deploy/cr.yaml
+kubectl -n gcp-operator apply -f deploy/cr-instance.yaml
 ```
 
 After a few minutes check to see if the new instance exists:
@@ -41,6 +43,25 @@ After a few minutes check to see if the new instance exists:
 gcloud compute instances list
 NAME                                     ZONE           MACHINE_TYPE               PREEMPTIBLE  INTERNAL_IP  EXTERNAL_IP     STATUS
 test                                     us-central1-a  custom (2 vCPU, 4.00 GiB)               10.128.0.2                   RUNNING
+```
+
+### Create GCP Address
+
+Edit `deploy/cr-address.yaml` replacing the project ID placeholders with your GCP project.
+
+Once the GCP Operator is deployed you can create a GCP instance:
+
+```bash
+kubectl -n gcp-operator apply -f deploy/cr-address.yaml
+```
+
+After a few minutes check to see if the new instance exists:
+
+```bash
+gcloud compute addresses list
+NAME                   REGION       ADDRESS          STATUS
+example                us-central1  35.226.61.203    RESERVED
+
 ```
 
 Cleanup:

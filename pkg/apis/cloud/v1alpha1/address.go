@@ -7,7 +7,7 @@ import (
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type InstanceList struct {
+type AddressList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
 	Items           []Instance `json:"items"`
@@ -15,19 +15,18 @@ type InstanceList struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type Instance struct {
+type Address struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
-	Spec              InstanceSpec   `json:"spec"`
-	Status            InstanceStatus `json:"status,omitempty"`
+	Spec              AddressSpec   `json:"spec"`
+	Status            AddressStatus `json:"status,omitempty"`
 }
 
-type InstanceSpec struct {
-	ProjectID string            `json:"projectID"`
-	Payload   *compute.Instance `json:"payload"`
+type AddressSpec struct {
+	ProjectID string           `json:"projectID"`
+	Payload   *compute.Address `json:"payload"`
 }
 
-type InstanceStatus struct {
-	Status        string `json:"status"`
-	StatusMessage string `json:"statusMessage"`
+type AddressStatus struct {
+	Status string `json:"status"`
 }
