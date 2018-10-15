@@ -1,7 +1,6 @@
 package v1alpha1
 
 import (
-	compute "google.golang.org/api/compute/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -23,8 +22,8 @@ type Instance struct {
 }
 
 type InstanceSpec struct {
-	ProjectID string           `json:"projectID"`
-	Instance  compute.Instance `json:"instance"`
+	ProjectID string                 `json:"projectID"`
+	Payload   map[string]interface{} `json:"payload"`
 }
 
 type InstanceStatus struct {

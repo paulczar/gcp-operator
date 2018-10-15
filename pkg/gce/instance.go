@@ -40,6 +40,9 @@ func (gce *GCEClient) Get(payload compute.Instance) (*compute.Instance, error) {
 func (gce *GCEClient) Delete(payload compute.Instance) error {
 	op, err := gce.service.Instances.Delete(gce.projectID, payload.Zone, payload.Name).Do()
 	if err != nil {
+		if isHTTPErrorCode(err, 404) {
+			return nil
+		}
 		return err
 	}
 	if err = gce.waitForZoneOp(op, payload.Zone); err != nil {
