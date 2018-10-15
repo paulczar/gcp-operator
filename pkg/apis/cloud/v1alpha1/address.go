@@ -23,8 +23,8 @@ type Address struct {
 }
 
 type AddressSpec struct {
-	ProjectID string           `json:"projectID"`
-	Payload   *compute.Address `json:"payload"`
+	//ProjectID string           `json:"projectID"`
+	*compute.Address
 }
 
 type AddressStatus struct {

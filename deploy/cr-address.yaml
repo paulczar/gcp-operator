@@ -3,7 +3,5 @@ kind: "Address"
 metadata:
   name: "example"
 spec:
-  projectID: <gcp-project-id>
-  payload:
-    region: us-central1
-    name: example
+  region: us-central1
+  name: example

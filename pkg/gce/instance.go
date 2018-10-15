@@ -13,6 +13,13 @@ type Instance interface {
 
 // Create an instance.
 func (gce *GCEClient) InstanceCreate(payload compute.Instance) error {
+	payload.MachineType = machineTypeURL(gce.projectID, payload.Zone, payload.MachineType)
+	for i, n := range payload.NetworkInterfaces {
+		nu := networkURL(gce.projectID, n.Network)
+		if n.Network != nu {
+			payload.NetworkInterfaces[i].Network = nu
+		}
+	}
 	op, err := gce.service.Instances.Insert(gce.projectID, payload.Zone, &payload).Do()
 	if err != nil {
 		return err

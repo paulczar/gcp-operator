@@ -2,7 +2,16 @@
 
 This is a demo operator for the [Google Cloud Platform](https://cloud.google.com) which simplifies requesting google cloud resources in the form on Kubernetes Manifests.
 
-## Example:
+## Annotations
+
+You can set the following Annotations:
+
+| Annotation | Description |
+| ---------- | ----------- |
+| `cloud.google.com/project-id` | Sets the GCP Project ID if different to that used in operator service account |
+
+
+## Example Usage
 
 Create a namespace to run the operator in:
 

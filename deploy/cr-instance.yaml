@@ -3,18 +3,21 @@ kind: "Instance"
 metadata:
   name: "example"
 spec:
-  projectID: <gcp-project-id>
-  payload:
-    zone: us-central1-a
-    name: example
-    description: test instance
-    machineType: https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/zones/us-central1-a/machineTypes/custom-2-4096
-    disks:
-      - type: PERSISTENT
-        boot: true
-        autoDelete: true
-        initializeParams:
-          diskName: example-root
-          sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20140606
-    networkInterfaces:
-      - network: https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/global/networks/default
+  zone: us-central1-a
+  name: example
+  description: test instance
+  # can be full URL or just the machineType, if latter will expand it out using project id and zone.
+  #machineType: https://www.googleapis.com/compute/v1/projects/<gcp-project-id>/zones/us-central1-a/machineTypes/custom-2-4096
+  machineType: custom-2-4096
+  disks:
+    - type: PERSISTENT
+      boot: true
+      autoDelete: true
+      initializeParams:
+        diskName: example-root
+        # currently needs to be full URL
+        sourceImage: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/images/debian-7-wheezy-v20140606
+  networkInterfaces:
+      # can be full URL or just the network name, if latter will expand it out using project id assuming a global network.
+      # - network: https://www.googleapis.com/compute/v1/projects/debian-cloud/global/networks/default
+    - network: default

@@ -23,8 +23,7 @@ type Instance struct {
 }
 
 type InstanceSpec struct {
-	ProjectID string            `json:"projectID"`
-	Payload   *compute.Instance `json:"payload"`
+	*compute.Instance
 }
 
 type InstanceStatus struct {

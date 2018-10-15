@@ -11,16 +11,7 @@ import (
 type GCEClient struct {
 	service   *compute.Service
 	projectID string
-	//request   *compute.Instance
-	//payload   map[string]interface{}
 }
-
-/*
-err = ms.Decode(o.Spec.Payload, &address)
-if err != nil {
-	panic(err)
-}
-*/
 
 // CreateGCECloud creates a new instance of GCECloud.
 func New(project string) (*GCEClient, error) {
@@ -34,7 +25,13 @@ func New(project string) (*GCEClient, error) {
 	if err != nil {
 		return nil, err
 	}
-
+	if project == "" {
+		credentials, err := google.FindDefaultCredentials(ctx, compute.ComputeScope)
+		if err != nil {
+			return nil, err
+		}
+		project = credentials.ProjectID
+	}
 	// TODO validate project and network exist
 	return &GCEClient{
 		service:   svc,
