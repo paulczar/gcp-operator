@@ -27,6 +27,14 @@ kubectl -n gcp-operator create secret \
   --from-file=google.json=/path/to/credentials.json
 ```
 
+If using GKE you need to ensure your user has the cluster admin role binding:
+
+```bash
+kubectl create clusterrolebinding cluster-admin-binding \
+    --clusterrole=cluster-admin --user=<your gcp account email address>
+clusterrolebinding.rbac.authorization.k8s.io/cluster-admin-binding created
+```
+
 Deploy the GCP Operator:
 
 ```bash
@@ -37,8 +45,6 @@ kubectl -n gcp-operator apply -f deploy/operator.yaml
 ```
 
 ### Create GCP Instance
-
-Edit `deploy/cr-instance.yaml` replacing the project ID placeholders with your GCP project.
 
 Once the GCP Operator is deployed you can create a GCP instance:
 
