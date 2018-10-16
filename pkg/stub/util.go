@@ -9,3 +9,11 @@ func getProjectID(meta metav1.ObjectMeta) string {
 	}
 	return ""
 }
+
+func setName(meta, spec string) string {
+	if spec == "" {
+		return meta
+	} else {
+		return spec
+	}
+}

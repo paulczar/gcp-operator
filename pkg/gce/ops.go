@@ -14,6 +14,21 @@ const (
 	operationPollTimeoutDuration = 30 * time.Minute
 )
 
+func (gce *GCEClient) waitForOp(op *compute.Operation, loc string) error {
+	if loc == "" {
+		return gce.waitForGlobalOp(op)
+	} else {
+		err := gce.waitForRegionOp(op, loc)
+		if err != nil {
+			if isHTTPErrorCode(err, 404) {
+				return gce.waitForZoneOp(op, loc)
+			}
+			return err
+		}
+	}
+	return nil
+}
+
 func (gce *GCEClient) waitForGlobalOp(op *compute.Operation) error {
 	return waitForOp(op, func(operationName string) (*compute.Operation, error) {
 		return gce.service.GlobalOperations.Get(gce.projectID, operationName).Do()

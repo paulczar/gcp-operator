@@ -7,26 +7,25 @@ import (
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type AddressList struct {
+type ForwardingRuleList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
-	Items           []Address `json:"items"`
+	Items           []ForwardingRule `json:"items"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type Address struct {
+type ForwardingRule struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
-	Spec              AddressSpec   `json:"spec"`
-	Status            AddressStatus `json:"status,omitempty"`
+	Spec              ForwardingRuleSpec   `json:"spec"`
+	Status            ForwardingRuleStatus `json:"status,omitempty"`
 }
 
-type AddressSpec struct {
-	//ProjectID string           `json:"projectID"`
-	*compute.Address
+type ForwardingRuleSpec struct {
+	*compute.ForwardingRule
 }
 
-type AddressStatus struct {
+type ForwardingRuleStatus struct {
 	Status string `json:"status"`
 }

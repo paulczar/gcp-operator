@@ -1,32 +1,32 @@
 package v1alpha1
 
 import (
-	compute "google.golang.org/api/compute/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type AddressList struct {
+type TargetPoolList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
-	Items           []Address `json:"items"`
+	Items           []TargetPool `json:"items"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-type Address struct {
+type TargetPool struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata"`
-	Spec              AddressSpec   `json:"spec"`
-	Status            AddressStatus `json:"status,omitempty"`
+	Spec              TargetPoolSpec   `json:"spec"`
+	Status            TargetPoolStatus `json:"status,omitempty"`
 }
 
-type AddressSpec struct {
-	//ProjectID string           `json:"projectID"`
-	*compute.Address
+type TargetPoolSpec struct {
+	//*compute.TargetPool
+	Resource map[string]interface{} `json:"resource"`
+	//Resource *compute.TargetPool `json:"resource"`
 }
 
-type AddressStatus struct {
+type TargetPoolStatus struct {
 	Status string `json:"status"`
 }

@@ -1,0 +1,23 @@
+apiVersion: "cloud.google.com/v1alpha1"
+kind: "ForwardingRule"
+metadata:
+  name: "example"
+spec:
+  name: example
+## An address can be specified either by a literal IP address or a URL
+## reference to an existing Address resource. The following examples are
+## all valid:
+## - 100.1.2.3
+## -
+## https://www.googleapis.com/compute/v1/projects/project/regions/region/addresses/address
+## - projects/project/regions/region/addresses/address
+## - regions/region/addresses/address
+## - global/addresses/address
+## - address
+  IPAddress: https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/regions/us-central1/addresses/example
+## TCP, UDP, ESP, AH, SCTP or ICMP
+  IPProtocol: TCP
+## 80,443,53,etc
+  portRange: 80
+  region: us-central1
+  target: https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/regions/us-central1/targetPools/example
