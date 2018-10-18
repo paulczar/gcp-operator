@@ -4,35 +4,51 @@ import (
 	compute "google.golang.org/api/compute/v1"
 )
 
-type Instance interface {
-	InstanceCreate(i *compute.Instance) error
-	InstanceGet(i *compute.Instance) (*compute.Instance, error)
-	InstanceDelete(i *compute.Instance) error
-	InstanceUpdate(i *compute.Instance) error
+//type Instance interface {
+//	InstanceCreate(i *compute.Instance) error
+//	InstanceGet(i *compute.Instance) (*compute.Instance, error)
+//	InstanceDelete(i *compute.Instance) error
+//	InstanceUpdate(i *compute.Instance) error
+//}
+
+type InstanceService struct {
+	GCE     *GCEClient
+	Payload *compute.Instance
+}
+
+func NewInstanceService(project string, instance *compute.Instance) (*InstanceService, error) {
+	is, err := New(project)
+	if err != nil {
+		return nil, err
+	}
+	return &InstanceService{
+		GCE:     is,
+		Payload: instance,
+	}, nil
 }
 
 // Create an instance.
-func (gce *GCEClient) InstanceCreate(payload compute.Instance) error {
-	payload.MachineType = machineTypeURL(gce.projectID, payload.Zone, payload.MachineType)
-	for i, n := range payload.NetworkInterfaces {
-		nu := networkURL(gce.projectID, n.Network)
+func (is *InstanceService) Create() error {
+	is.Payload.MachineType = machineTypeURL(is.GCE.projectID, is.Payload.Zone, is.Payload.MachineType)
+	for i, n := range is.Payload.NetworkInterfaces {
+		nu := networkURL(is.GCE.projectID, n.Network)
 		if n.Network != nu {
-			payload.NetworkInterfaces[i].Network = nu
+			is.Payload.NetworkInterfaces[i].Network = nu
 		}
 	}
-	op, err := gce.service.Instances.Insert(gce.projectID, payload.Zone, &payload).Do()
+	op, err := is.GCE.service.Instances.Insert(is.GCE.projectID, is.Payload.Zone, is.Payload).Do()
 	if err != nil {
 		return err
 	}
-	if err = gce.waitForZoneOp(op, payload.Zone); err != nil {
+	if err = is.GCE.waitForZoneOp(op, is.Payload.Zone); err != nil {
 		return err
 	}
 	return nil
 }
 
 // Get an Instance
-func (gce *GCEClient) InstanceGet(payload compute.Instance) (*compute.Instance, error) {
-	instance, err := gce.service.Instances.Get(gce.projectID, payload.Zone, payload.Name).Do()
+func (is *InstanceService) Get() (*compute.Instance, error) {
+	instance, err := is.GCE.service.Instances.Get(is.GCE.projectID, is.Payload.Zone, is.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil, nil
@@ -44,15 +60,15 @@ func (gce *GCEClient) InstanceGet(payload compute.Instance) (*compute.Instance, 
 }
 
 // Delete an instance
-func (gce *GCEClient) InstanceDelete(payload compute.Instance) error {
-	op, err := gce.service.Instances.Delete(gce.projectID, payload.Zone, payload.Name).Do()
+func (is *InstanceService) Delete() error {
+	op, err := is.GCE.service.Instances.Delete(is.GCE.projectID, is.Payload.Zone, is.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil
 		}
 		return err
 	}
-	if err = gce.waitForZoneOp(op, payload.Zone); err != nil {
+	if err = is.GCE.waitForZoneOp(op, is.Payload.Zone); err != nil {
 		return err
 	}
 	return nil
@@ -60,6 +76,6 @@ func (gce *GCEClient) InstanceDelete(payload compute.Instance) error {
 
 // Update an instance
 // currently do not support updating an instance
-func (gce *GCEClient) InstanceUpdate(payload compute.Instance) error {
+func (is *InstanceService) Update() error {
 	return nil
 }

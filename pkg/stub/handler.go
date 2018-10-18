@@ -17,7 +17,6 @@ func NewHandler() sdk.Handler {
 }
 
 type Handler struct {
-	// Fill me
 }
 
 func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
@@ -25,35 +24,31 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	logrus.Debugf("Poll Kubernetes API for changes to known resources.")
 	switch o := event.Object.(type) {
 	case *v1alpha1.Instance:
+		instance := compute.Instance{}
 		p := getProjectID(o.ObjectMeta)
-		o.Spec.Name = setName(o.Name, o.Spec.Name)
-		if event.Deleted {
-			return deleteInstance(p, *o.Spec.Instance)
+		err := mapstructure.Decode(o.Spec, &instance)
+		if err != nil {
+			panic(err)
 		}
-		ni, err := newInstance(p, *o.Spec.Instance)
+		if event.Deleted {
+			return deleteInstance(p, instance)
+		}
+		ni, err := newInstance(p, instance)
 		if err != nil && !errors.IsAlreadyExists(err) {
 			logrus.Errorf("failed to create instance : %v", err)
 			return err
 		}
-		s := v1alpha1.InstanceStatus{
-			Status:        ni.Status,
-			StatusMessage: ni.StatusMessage,
+		s := v1alpha1.ServiceStatus{
+			Status: ni.Status,
+			//StatusMessage: ni.StatusMessage,
 		}
 		if o.Status != s {
 			o.Status = s
 			updateSDK = true
 		}
-		if o.Spec.Instance.MachineType != ni.MachineType {
-			o.Spec.Instance.MachineType = ni.MachineType
+		if instance.MachineType != ni.MachineType {
+			o.Spec["MachineType"] = ni.MachineType
 			updateSDK = true
-		}
-		// todo this is probably a bad test because of unstrict ordering. fix it.
-		for i, v := range o.Spec.Instance.NetworkInterfaces {
-			if v.Fingerprint != ni.NetworkInterfaces[i].Fingerprint {
-				fmt.Printf("update from %v to %v\n", v, ni.NetworkInterfaces[i])
-				o.Spec.Instance.NetworkInterfaces = ni.NetworkInterfaces
-				updateSDK = true
-			}
 		}
 		if updateSDK {
 			err := sdk.Update(o)
@@ -64,24 +59,28 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 
 	case *v1alpha1.Address:
 		p := getProjectID(o.ObjectMeta)
-		o.Spec.Name = setName(o.Name, o.Spec.Name)
-		if event.Deleted {
-			return deleteAddress(p, *o.Spec.Address)
+		address := compute.Address{}
+		err := mapstructure.Decode(o.Spec, &address)
+		if err != nil {
+			panic(err)
 		}
-		na, err := newAddress(p, *o.Spec.Address)
+		if event.Deleted {
+			return deleteAddress(p, address)
+		}
+		na, err := newAddress(p, address)
 		if err != nil && !errors.IsAlreadyExists(err) {
 			logrus.Errorf("failed to create address : %v", err)
 			return err
 		}
-		if o.Spec.Address.Address != na.Address {
-			o.Spec.Address.Address = na.Address
+		if o.Spec["Address"] != na.Address {
+			o.Spec["Address"] = na.Address
 			updateSDK = true
 		}
-		if o.Spec.Address.SelfLink != na.SelfLink {
-			o.Spec.Address.SelfLink = na.SelfLink
+		if o.Spec["SelfLink"] != na.SelfLink {
+			o.Spec["SelfLink"] = na.SelfLink
 			updateSDK = true
 		}
-		s := v1alpha1.AddressStatus{
+		s := v1alpha1.ServiceStatus{
 			Status: na.Status,
 		}
 		if o.Status != s {
@@ -97,20 +96,17 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 
 	case *v1alpha1.ForwardingRule:
 		p := getProjectID(o.ObjectMeta)
-		o.Spec.Name = setName(o.Name, o.Spec.Name)
+		rule := compute.ForwardingRule{}
+		//status := v1alpha1.ServiceStatus{}
+		err := mapstructure.Decode(o.Spec, &rule)
+		if err != nil {
+			panic(err)
+		}
 		if event.Deleted {
-			return deleteForwardingRule(p, *o.Spec.ForwardingRule)
+			return deleteForwardingRule(p, rule)
 		}
-		na, err := newForwardingRule(p, *o.Spec.ForwardingRule)
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create Forwarding Rule : %v", err)
-			return err
-		}
-		if o.Spec.ForwardingRule != na {
-			o.Spec.ForwardingRule = na
-			updateSDK = true
-		}
-		s := v1alpha1.ForwardingRuleStatus{Status: "CREATED"}
+		_, err = newForwardingRule(p, rule)
+		s := getStatus("", "", err)
 		if o.Status != s {
 			o.Status = s
 			updateSDK = true
@@ -121,12 +117,16 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 				return err
 			}
 		}
+		if err != nil {
+			return err
+		}
+
 	// todo provide a way to specify a list of instances from CRD above (tags? labels? metadata?)
 	case *v1alpha1.TargetPool:
 		p := getProjectID(o.ObjectMeta)
 		//o.Spec.Name = setName(o.Name, o.Spec.Name)
 		tp := compute.TargetPool{}
-		err := mapstructure.Decode(o.Spec.Resource, &tp)
+		err := mapstructure.Decode(o.Spec, &tp)
 		if err != nil {
 			panic(err)
 		}
@@ -142,7 +142,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		//			o.Spec.Resource = na
 		//			updateSDK = true
 		//		}
-		s := v1alpha1.TargetPoolStatus{Status: "CREATED"}
+		s := v1alpha1.ServiceStatus{Status: "CREATED"}
 		if o.Status != s {
 			o.Status = s
 			updateSDK = true
@@ -158,4 +158,19 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	}
 
 	return nil
+}
+
+func getStatus(stat, message string, err error) v1alpha1.ServiceStatus {
+	var s = v1alpha1.ServiceStatus{
+		Status:  stat,
+		Message: message,
+	}
+	if err != nil && !errors.IsAlreadyExists(err) {
+		s = v1alpha1.ServiceStatus{
+			Status:  "FAILED",
+			Message: err.Error(),
+		}
+		return s
+	}
+	return s
 }

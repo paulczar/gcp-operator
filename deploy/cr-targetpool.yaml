@@ -3,8 +3,7 @@ kind: "TargetPool"
 metadata:
   name: "example"
 spec:
-  resource:
-    name: example
-    region: us-central1
-    instances:
-      - https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/zones/us-central1-a/instances/example
+  name: example
+  region: us-central1
+  instances: []
+#    - https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/zones/us-central1-a/instances/example

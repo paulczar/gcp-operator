@@ -12,7 +12,6 @@ func deleteForwardingRule(project string, forwardingRule compute.ForwardingRule)
 	if err != nil {
 		panic(err)
 	}
-	//spew.Dump(cr)
 	return client.ForwardingRuleDelete(forwardingRule)
 }
 

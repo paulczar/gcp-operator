@@ -17,7 +17,7 @@ spec:
   IPAddress: https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/regions/us-central1/addresses/example
 ## TCP, UDP, ESP, AH, SCTP or ICMP
   IPProtocol: TCP
-## 80,443,53,etc
-  portRange: 80
+## portRage needs to be a string
+  portRange: "80"
   region: us-central1
   target: https://www.googleapis.com/compute/v1/projects/pgtm-pczarkowski/regions/us-central1/targetPools/example
