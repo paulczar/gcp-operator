@@ -1,0 +1,19 @@
+apiVersion: "cloud.google.com/v1alpha1"
+kind: "Network"
+metadata:
+  name: "example"
+spec:
+  name: example
+  description: example network
+---
+apiVersion: "cloud.google.com/v1alpha1"
+kind: "Subnetwork"
+metadata:
+  name: "example"
+spec:
+  name: example
+  description: example subnetwork
+  gatewayAddress: 192.168.33.1
+  ipCidrRange: 192.168.33.0/24
+  network: projects/pgtm-pczarkowski/global/networks/example
+  region: us-central1

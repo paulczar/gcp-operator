@@ -2,6 +2,17 @@
 
 This is a demo operator for the [Google Cloud Platform](https://cloud.google.com) which simplifies requesting google cloud resources in the form on Kubernetes Manifests.
 
+The goal of the Operator is to provide a bare minimum set of Kubernetes CRDs to enable provisioning GCP services. To enable this the manifest Specs are generally a 1:1 mapping to the GCP API objects.
+
+Currently supports creating and destroying the following GCP Services:
+
+* Addresses
+* Instances
+* Forwarding Rules
+* Networks
+* Subnetworks
+* Target Pools
+
 ## Annotations
 
 You can set the following Annotations:

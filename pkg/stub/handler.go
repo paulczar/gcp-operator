@@ -153,6 +153,72 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 				return err
 			}
 		}
+
+	case *v1alpha1.Network:
+		svc := compute.Network{}
+		p := getProjectID(o.ObjectMeta)
+		err := mapstructure.Decode(o.Spec, &svc)
+		if err != nil {
+			panic(err)
+		}
+		if event.Deleted {
+			return deleteNetwork(p, svc)
+		}
+		_, err = newNetwork(p, svc)
+		if err != nil && !errors.IsAlreadyExists(err) {
+			logrus.Errorf("failed to create network : %v", err)
+			return err
+		}
+		s := v1alpha1.ServiceStatus{
+			Status: "CREATED",
+			//StatusMessage: ni.StatusMessage,
+		}
+		if o.Status != s {
+			o.Status = s
+			updateSDK = true
+		}
+		// todo update subnet list if different
+		if updateSDK {
+			err := sdk.Update(o)
+			if err != nil {
+				return err
+			}
+		}
+
+	case *v1alpha1.Subnetwork:
+		var status v1alpha1.ServiceStatus
+		var err error
+		svc := compute.Subnetwork{}
+		p := getProjectID(o.ObjectMeta)
+		if err := mapstructure.Decode(o.Spec, &svc); err != nil {
+			panic(err)
+		}
+		if event.Deleted {
+			return deleteSubnetwork(p, svc)
+		}
+		_, err = newSubnetwork(p, svc)
+		if err != nil && !errors.IsAlreadyExists(err) {
+			logrus.Errorf("failed to create subnetwork : %v", err)
+			status.Status = "FAILED"
+			status.Message = err.Error()
+		} else {
+			status.Status = "CREATED"
+		}
+		if o.Status != status {
+			o.Status = status
+			updateSDK = true
+		}
+		// todo update if different
+		if updateSDK {
+			err := sdk.Update(o)
+			if err != nil {
+				return err
+			}
+		}
+		if err != nil && !errors.IsAlreadyExists(err) {
+			return err
+		}
+
 	default:
 		fmt.Println("OMG WTF I DUNNO")
 	}

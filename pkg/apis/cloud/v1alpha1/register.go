@@ -35,6 +35,10 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&ForwardingRuleList{},
 		&TargetPool{},
 		&TargetPoolList{},
+		&Network{},
+		&NetworkList{},
+		&Subnetwork{},
+		&SubnetworkList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

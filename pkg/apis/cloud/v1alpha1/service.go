@@ -30,3 +30,19 @@ type ServiceStatus struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 }
+
+type NetworkList struct {
+	Service
+}
+
+type Network struct {
+	Service
+}
+
+type SubnetworkList struct {
+	Service
+}
+
+type Subnetwork struct {
+	Service
+}
