@@ -31,10 +31,21 @@ func NewInstanceService(project string, instance *compute.Instance) (*InstanceSe
 func (is *InstanceService) Create() error {
 	is.Payload.MachineType = machineTypeURL(is.GCE.projectID, is.Payload.Zone, is.Payload.MachineType)
 	for i, n := range is.Payload.NetworkInterfaces {
-		nu := networkURL(is.GCE.projectID, n.Network)
-		if n.Network != nu {
-			is.Payload.NetworkInterfaces[i].Network = nu
+		if n.Network != "" {
+			nu := networkURL(is.GCE.projectID, n.Network)
+			if n.Network != nu {
+				is.Payload.NetworkInterfaces[i].Network = nu
+			}
 		}
+		/*
+			todo DO FOR SUBNETS WHAT WE'RE DOING FOR NETWORKS ABOVE
+			if n.Subnetwork != "" {
+				nu := subnetworkURL(is.GCE.projectID, is.Payload.Zone, n.Subnetwork)
+				if n.Subnetwork != nu {
+					is.Payload.NetworkInterfaces[i].Subnetwork = nu
+				}
+			}
+		*/
 	}
 	op, err := is.GCE.service.Instances.Insert(is.GCE.projectID, is.Payload.Zone, is.Payload).Do()
 	if err != nil {

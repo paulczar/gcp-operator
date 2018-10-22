@@ -25,3 +25,13 @@ func networkURL(project, network string) string {
 		return strings.Join([]string{prefix, project, "global/networks", network}, "/")
 	}
 }
+
+// Ensures network is proper URL
+// //www.googleapis.com/compute/v1/projects/<projection>/regions/<region>/subnetworks/infrastructure
+func subnetworkURL(project, region, network string) string {
+	if strings.HasPrefix(network, "https://") {
+		return network
+	} else {
+		return strings.Join([]string{prefix, project, "region", region, "subnetworks", network}, "/")
+	}
+}

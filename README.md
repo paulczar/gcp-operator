@@ -12,6 +12,8 @@ Currently supports creating and destroying the following GCP Services:
 * Networks
 * Subnetworks
 * Target Pools
+* Firewalls
+* Images
 
 ## Annotations
 

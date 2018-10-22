@@ -46,3 +46,11 @@ type SubnetworkList struct {
 type Subnetwork struct {
 	Service
 }
+
+type Image struct {
+	Service
+}
+
+type ImageList struct {
+	Service
+}

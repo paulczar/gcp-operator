@@ -39,6 +39,10 @@ func addKnownTypes(scheme *runtime.Scheme) error {
 		&NetworkList{},
 		&Subnetwork{},
 		&SubnetworkList{},
+		&Image{},
+		&ImageList{},
+		&Firewall{},
+		&FirewallList{},
 	)
 	metav1.AddToGroupVersion(scheme, SchemeGroupVersion)
 	return nil

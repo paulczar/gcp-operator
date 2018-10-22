@@ -26,8 +26,8 @@ func main() {
 	sdk.ExposeMetricsPort()
 
 	resource := "cloud.google.com/v1alpha1"
-	kinds := []string{"Instance", "Address", "ForwardingRule", "TargetPool", "Network", "Subnetwork"}
 	namespace, err := k8sutil.GetWatchNamespace()
+	kinds := []string{"Firewall", "Image", "Instance", "Address", "ForwardingRule", "TargetPool", "Network", "Subnetwork"}
 	if err != nil {
 		logrus.Fatalf("failed to get watch namespace: %v", err)
 	}

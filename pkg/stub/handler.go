@@ -24,6 +24,7 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	logrus.Debugf("Poll Kubernetes API for changes to known resources.")
 	switch o := event.Object.(type) {
 	case *v1alpha1.Instance:
+		var status v1alpha1.ServiceStatus
 		instance := compute.Instance{}
 		p := getProjectID(o.ObjectMeta)
 		err := mapstructure.Decode(o.Spec, &instance)
@@ -35,15 +36,14 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 		ni, err := newInstance(p, instance)
 		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create instance : %v", err)
-			return err
+			logrus.Errorf("failed to create image : %v", err)
+			status.Status = "FAILED"
+			status.Message = err.Error()
+		} else {
+			status.Status = "CREATED"
 		}
-		s := v1alpha1.ServiceStatus{
-			Status: ni.Status,
-			//StatusMessage: ni.StatusMessage,
-		}
-		if o.Status != s {
-			o.Status = s
+		if o.Status != status {
+			o.Status = status
 			updateSDK = true
 		}
 		if instance.MachineType != ni.MachineType {
@@ -199,6 +199,74 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		_, err = newSubnetwork(p, svc)
 		if err != nil && !errors.IsAlreadyExists(err) {
 			logrus.Errorf("failed to create subnetwork : %v", err)
+			status.Status = "FAILED"
+			status.Message = err.Error()
+		} else {
+			status.Status = "CREATED"
+		}
+		if o.Status != status {
+			o.Status = status
+			updateSDK = true
+		}
+		// todo update if different
+		if updateSDK {
+			err := sdk.Update(o)
+			if err != nil {
+				return err
+			}
+		}
+		if err != nil && !errors.IsAlreadyExists(err) {
+			return err
+		}
+
+	case *v1alpha1.Image:
+		var status v1alpha1.ServiceStatus
+		var err error
+		svc := compute.Image{}
+		p := getProjectID(o.ObjectMeta)
+		if err := mapstructure.Decode(o.Spec, &svc); err != nil {
+			panic(err)
+		}
+		if event.Deleted {
+			return deleteImage(p, svc)
+		}
+		_, err = newImage(p, svc)
+		if err != nil && !errors.IsAlreadyExists(err) {
+			logrus.Errorf("failed to create image : %v", err)
+			status.Status = "FAILED"
+			status.Message = err.Error()
+		} else {
+			status.Status = "CREATED"
+		}
+		if o.Status != status {
+			o.Status = status
+			updateSDK = true
+		}
+		// todo update if different
+		if updateSDK {
+			err := sdk.Update(o)
+			if err != nil {
+				return err
+			}
+		}
+		if err != nil && !errors.IsAlreadyExists(err) {
+			return err
+		}
+
+	case *v1alpha1.Firewall:
+		var status v1alpha1.ServiceStatus
+		var err error
+		svc := compute.Firewall{}
+		p := getProjectID(o.ObjectMeta)
+		if err := mapstructure.Decode(o.Spec, &svc); err != nil {
+			panic(err)
+		}
+		if event.Deleted {
+			return deleteFirewall(p, svc)
+		}
+		_, err = newFirewall(p, svc)
+		if err != nil && !errors.IsAlreadyExists(err) {
+			logrus.Errorf("failed to create firewall : %v", err)
 			status.Status = "FAILED"
 			status.Message = err.Error()
 		} else {
