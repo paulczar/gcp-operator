@@ -2,6 +2,7 @@ package stub
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 
 	"github.com/mitchellh/mapstructure"
@@ -24,7 +25,6 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	logrus.Debugf("Poll Kubernetes API for changes to known resources.")
 	switch o := event.Object.(type) {
 	case *v1alpha1.Instance:
-		var status v1alpha1.ServiceStatus
 		instance := compute.Instance{}
 		p := getProjectID(o.ObjectMeta)
 		err := mapstructure.Decode(o.Spec, &instance)
@@ -34,20 +34,18 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if event.Deleted {
 			return deleteInstance(p, instance)
 		}
-		ni, err := newInstance(p, instance)
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create image : %v", err)
-			status.Status = "FAILED"
-			status.Message = err.Error()
-		} else {
-			status.Status = "CREATED"
+		res, err := newInstance(p, instance)
+		oj, ojerr := json.Marshal(res)
+		if ojerr != nil {
+			oj = []byte{}
 		}
-		if o.Status != status {
-			o.Status = status
+		s := getStatus(res.Status, res.StatusMessage, string(oj), err)
+		if o.Status != s {
+			o.Status = s
 			updateSDK = true
 		}
-		if instance.MachineType != ni.MachineType {
-			o.Spec["MachineType"] = ni.MachineType
+		if instance.MachineType != res.MachineType {
+			o.Spec["MachineType"] = res.MachineType
 			updateSDK = true
 		}
 		if updateSDK {
@@ -67,21 +65,23 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if event.Deleted {
 			return deleteAddress(p, address)
 		}
-		na, err := newAddress(p, address)
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create address : %v", err)
-			return err
+		res, err := newAddress(p, address)
+		oj, ojerr := json.Marshal(res)
+		if ojerr != nil {
+			oj = []byte{}
 		}
-		if o.Spec["Address"] != na.Address {
-			o.Spec["Address"] = na.Address
+		s := getStatus(res.Status, "", string(oj), err)
+		if o.Status != s {
+			o.Status = s
 			updateSDK = true
 		}
-		if o.Spec["SelfLink"] != na.SelfLink {
-			o.Spec["SelfLink"] = na.SelfLink
+		if o.Spec["Address"] != res.Address {
+			o.Spec["Address"] = res.Address
 			updateSDK = true
 		}
-		s := v1alpha1.ServiceStatus{
-			Status: na.Status,
+		if o.Spec["SelfLink"] != res.SelfLink {
+			o.Spec["SelfLink"] = res.SelfLink
+			updateSDK = true
 		}
 		if o.Status != s {
 			o.Status = s
@@ -105,8 +105,12 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if event.Deleted {
 			return deleteForwardingRule(p, rule)
 		}
-		_, err = newForwardingRule(p, rule)
-		s := getStatus("", "", err)
+		res, err := newForwardingRule(p, rule)
+		oj, ojerr := json.Marshal(res)
+		if ojerr != nil {
+			oj = []byte{}
+		}
+		s := getStatus("", "", string(oj), err)
 		if o.Status != s {
 			o.Status = s
 			updateSDK = true
@@ -133,16 +137,16 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if event.Deleted {
 			return deleteTargetPool(p, tp)
 		}
-		_, err = newTargetPool(p, tp)
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create Target Pool : %v", err)
-			return err
+		res, err := newTargetPool(p, tp)
+		oj, ojerr := json.Marshal(res)
+		if ojerr != nil {
+			oj = []byte{}
 		}
-		//		if tp != *na {
-		//			o.Spec.Resource = na
-		//			updateSDK = true
-		//		}
-		s := v1alpha1.ServiceStatus{Status: "CREATED"}
+		s := getStatus("", "", string(oj), err)
+		if o.Status != s {
+			o.Status = s
+			updateSDK = true
+		}
 		if o.Status != s {
 			o.Status = s
 			updateSDK = true
@@ -164,15 +168,12 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if event.Deleted {
 			return deleteNetwork(p, svc)
 		}
-		_, err = newNetwork(p, svc)
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create network : %v", err)
-			return err
+		res, err := newNetwork(p, svc)
+		oj, ojerr := json.Marshal(res)
+		if ojerr != nil {
+			oj = []byte{}
 		}
-		s := v1alpha1.ServiceStatus{
-			Status: "CREATED",
-			//StatusMessage: ni.StatusMessage,
-		}
+		s := getStatus("", "", string(oj), err)
 		if o.Status != s {
 			o.Status = s
 			updateSDK = true
@@ -186,7 +187,6 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 
 	case *v1alpha1.Subnetwork:
-		var status v1alpha1.ServiceStatus
 		var err error
 		svc := compute.Subnetwork{}
 		p := getProjectID(o.ObjectMeta)
@@ -196,19 +196,16 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if event.Deleted {
 			return deleteSubnetwork(p, svc)
 		}
-		_, err = newSubnetwork(p, svc)
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create subnetwork : %v", err)
-			status.Status = "FAILED"
-			status.Message = err.Error()
-		} else {
-			status.Status = "CREATED"
+		res, err := newSubnetwork(p, svc)
+		oj, ojerr := json.Marshal(res)
+		if ojerr != nil {
+			oj = []byte{}
 		}
-		if o.Status != status {
-			o.Status = status
+		s := getStatus("", "", string(oj), err)
+		if o.Status != s {
+			o.Status = s
 			updateSDK = true
-		}
-		// todo update if different
+		} // todo update if different
 		if updateSDK {
 			err := sdk.Update(o)
 			if err != nil {
@@ -220,7 +217,6 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 
 	case *v1alpha1.Image:
-		var status v1alpha1.ServiceStatus
 		var err error
 		svc := compute.Image{}
 		p := getProjectID(o.ObjectMeta)
@@ -230,16 +226,14 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if event.Deleted {
 			return deleteImage(p, svc)
 		}
-		_, err = newImage(p, svc)
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create image : %v", err)
-			status.Status = "FAILED"
-			status.Message = err.Error()
-		} else {
-			status.Status = "CREATED"
+		res, err := newImage(p, svc)
+		oj, ojerr := json.Marshal(res)
+		if ojerr != nil {
+			oj = []byte{}
 		}
-		if o.Status != status {
-			o.Status = status
+		s := getStatus(res.Status, "", string(oj), err)
+		if o.Status != s {
+			o.Status = s
 			updateSDK = true
 		}
 		// todo update if different
@@ -254,7 +248,6 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		}
 
 	case *v1alpha1.Firewall:
-		var status v1alpha1.ServiceStatus
 		var err error
 		svc := compute.Firewall{}
 		p := getProjectID(o.ObjectMeta)
@@ -264,19 +257,16 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 		if event.Deleted {
 			return deleteFirewall(p, svc)
 		}
-		_, err = newFirewall(p, svc)
-		if err != nil && !errors.IsAlreadyExists(err) {
-			logrus.Errorf("failed to create firewall : %v", err)
-			status.Status = "FAILED"
-			status.Message = err.Error()
-		} else {
-			status.Status = "CREATED"
+		res, err := newFirewall(p, svc)
+		oj, ojerr := json.Marshal(res)
+		if ojerr != nil {
+			oj = []byte{}
 		}
-		if o.Status != status {
-			o.Status = status
+		s := getStatus("", "", string(oj), err)
+		if o.Status != s {
+			o.Status = s
 			updateSDK = true
-		}
-		// todo update if different
+		} // todo update if different
 		if updateSDK {
 			err := sdk.Update(o)
 			if err != nil {
@@ -292,19 +282,4 @@ func (h *Handler) Handle(ctx context.Context, event sdk.Event) error {
 	}
 
 	return nil
-}
-
-func getStatus(stat, message string, err error) v1alpha1.ServiceStatus {
-	var s = v1alpha1.ServiceStatus{
-		Status:  stat,
-		Message: message,
-	}
-	if err != nil && !errors.IsAlreadyExists(err) {
-		s = v1alpha1.ServiceStatus{
-			Status:  "FAILED",
-			Message: err.Error(),
-		}
-		return s
-	}
-	return s
 }

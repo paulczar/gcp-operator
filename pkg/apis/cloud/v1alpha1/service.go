@@ -29,6 +29,7 @@ type ServiceSpec interface {
 type ServiceStatus struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
+	Object  string `json:"object"`
 }
 
 type NetworkList struct {
