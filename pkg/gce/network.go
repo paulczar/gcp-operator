@@ -34,7 +34,7 @@ func (svc *NetworkService) Create() error {
 	if !svc.Payload.AutoCreateSubnetworks {
 		svc.Payload.AutoCreateSubnetworks = false
 	}
-	op, err := svc.GCE.service.Networks.Insert(svc.GCE.projectID, svc.Payload).Do()
+	op, err := svc.GCE.compute.Networks.Insert(svc.GCE.projectID, svc.Payload).Do()
 	if err != nil {
 		return err
 	}
@@ -46,7 +46,7 @@ func (svc *NetworkService) Create() error {
 
 // Get an Instance
 func (svc *NetworkService) Get() (*compute.Network, error) {
-	instance, err := svc.GCE.service.Networks.Get(svc.GCE.projectID, svc.Payload.Name).Do()
+	instance, err := svc.GCE.compute.Networks.Get(svc.GCE.projectID, svc.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil, nil
@@ -59,7 +59,7 @@ func (svc *NetworkService) Get() (*compute.Network, error) {
 
 // Delete an instance
 func (svc *NetworkService) Delete() error {
-	op, err := svc.GCE.service.Networks.Delete(svc.GCE.projectID, svc.Payload.Name).Do()
+	op, err := svc.GCE.compute.Networks.Delete(svc.GCE.projectID, svc.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil

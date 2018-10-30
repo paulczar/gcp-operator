@@ -5,11 +5,13 @@ import (
 
 	"golang.org/x/oauth2/google"
 	compute "google.golang.org/api/compute/v1"
+	dns "google.golang.org/api/dns/v1"
 )
 
 // GCEClient is a placeholder for GCE stuff.
 type GCEClient struct {
-	service   *compute.Service
+	compute   *compute.Service
+	dns       *dns.Service
 	projectID string
 }
 
@@ -21,7 +23,11 @@ func New(project string) (*GCEClient, error) {
 	if err != nil {
 		return nil, err
 	}
-	svc, err := compute.New(client)
+	c, err := compute.New(client)
+	if err != nil {
+		return nil, err
+	}
+	d, err := dns.New(client)
 	if err != nil {
 		return nil, err
 	}
@@ -34,7 +40,8 @@ func New(project string) (*GCEClient, error) {
 	}
 	// TODO validate project and network exist
 	return &GCEClient{
-		service:   svc,
+		compute:   c,
+		dns:       d,
 		projectID: project,
 	}, nil
 }

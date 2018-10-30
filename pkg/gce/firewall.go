@@ -22,7 +22,7 @@ func NewFirewallService(project string, firewall *compute.Firewall) (*FirewallSe
 
 // Create an firewall.
 func (is *FirewallService) Create() error {
-	op, err := is.GCE.service.Firewalls.Insert(is.GCE.projectID, is.Payload).Do()
+	op, err := is.GCE.compute.Firewalls.Insert(is.GCE.projectID, is.Payload).Do()
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (is *FirewallService) Create() error {
 
 // Get an Firewall
 func (is *FirewallService) Get() (*compute.Firewall, error) {
-	firewall, err := is.GCE.service.Firewalls.Get(is.GCE.projectID, is.Payload.Name).Do()
+	firewall, err := is.GCE.compute.Firewalls.Get(is.GCE.projectID, is.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil, nil
@@ -47,7 +47,7 @@ func (is *FirewallService) Get() (*compute.Firewall, error) {
 
 // Delete an firewall
 func (is *FirewallService) Delete() error {
-	op, err := is.GCE.service.Firewalls.Delete(is.GCE.projectID, is.Payload.Name).Do()
+	op, err := is.GCE.compute.Firewalls.Delete(is.GCE.projectID, is.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil

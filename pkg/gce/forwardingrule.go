@@ -13,7 +13,7 @@ type ForwardingRule interface {
 
 // ForwardingRuleCreate an forwardingRule.
 func (gce *GCEClient) ForwardingRuleCreate(payload compute.ForwardingRule) error {
-	op, err := gce.service.ForwardingRules.Insert(gce.projectID, payload.Region, &payload).Do()
+	op, err := gce.compute.ForwardingRules.Insert(gce.projectID, payload.Region, &payload).Do()
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func (gce *GCEClient) ForwardingRuleCreate(payload compute.ForwardingRule) error
 
 // ForwardingRuleGet an ForwardingRule
 func (gce *GCEClient) ForwardingRuleGet(payload compute.ForwardingRule) (*compute.ForwardingRule, error) {
-	forwardingRule, err := gce.service.ForwardingRules.Get(gce.projectID, payload.Region, payload.Name).Do()
+	forwardingRule, err := gce.compute.ForwardingRules.Get(gce.projectID, payload.Region, payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil, nil
@@ -38,7 +38,7 @@ func (gce *GCEClient) ForwardingRuleGet(payload compute.ForwardingRule) (*comput
 
 // ForwardingRuleDelete an forwardingRule
 func (gce *GCEClient) ForwardingRuleDelete(payload compute.ForwardingRule) error {
-	op, err := gce.service.ForwardingRules.Delete(gce.projectID, payload.Region, payload.Name).Do()
+	op, err := gce.compute.ForwardingRules.Delete(gce.projectID, payload.Region, payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil

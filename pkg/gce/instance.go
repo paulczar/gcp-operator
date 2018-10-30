@@ -47,7 +47,7 @@ func (is *InstanceService) Create() error {
 			}
 		*/
 	}
-	op, err := is.GCE.service.Instances.Insert(is.GCE.projectID, is.Payload.Zone, is.Payload).Do()
+	op, err := is.GCE.compute.Instances.Insert(is.GCE.projectID, is.Payload.Zone, is.Payload).Do()
 	if err != nil {
 		return err
 	}
@@ -59,7 +59,7 @@ func (is *InstanceService) Create() error {
 
 // Get an Instance
 func (is *InstanceService) Get() (*compute.Instance, error) {
-	instance, err := is.GCE.service.Instances.Get(is.GCE.projectID, is.Payload.Zone, is.Payload.Name).Do()
+	instance, err := is.GCE.compute.Instances.Get(is.GCE.projectID, is.Payload.Zone, is.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil, nil
@@ -72,7 +72,7 @@ func (is *InstanceService) Get() (*compute.Instance, error) {
 
 // Delete an instance
 func (is *InstanceService) Delete() error {
-	op, err := is.GCE.service.Instances.Delete(is.GCE.projectID, is.Payload.Zone, is.Payload.Name).Do()
+	op, err := is.GCE.compute.Instances.Delete(is.GCE.projectID, is.Payload.Zone, is.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil

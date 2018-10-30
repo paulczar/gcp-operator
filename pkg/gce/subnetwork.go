@@ -29,7 +29,7 @@ func NewSubnetworkService(project string, payload *compute.Subnetwork) (*Subnetw
 
 // Create an instance.
 func (svc *SubnetworkService) Create() error {
-	op, err := svc.GCE.service.Subnetworks.Insert(svc.GCE.projectID, svc.Payload.Region, svc.Payload).Do()
+	op, err := svc.GCE.compute.Subnetworks.Insert(svc.GCE.projectID, svc.Payload.Region, svc.Payload).Do()
 	if err != nil {
 		return err
 	}
@@ -41,7 +41,7 @@ func (svc *SubnetworkService) Create() error {
 
 // Get an Instance
 func (svc *SubnetworkService) Get() (*compute.Subnetwork, error) {
-	instance, err := svc.GCE.service.Subnetworks.Get(svc.GCE.projectID, svc.Payload.Region, svc.Payload.Name).Do()
+	instance, err := svc.GCE.compute.Subnetworks.Get(svc.GCE.projectID, svc.Payload.Region, svc.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil, nil
@@ -54,7 +54,7 @@ func (svc *SubnetworkService) Get() (*compute.Subnetwork, error) {
 
 // Delete an instance
 func (svc *SubnetworkService) Delete() error {
-	op, err := svc.GCE.service.Subnetworks.Delete(svc.GCE.projectID, svc.Payload.Region, svc.Payload.Name).Do()
+	op, err := svc.GCE.compute.Subnetworks.Delete(svc.GCE.projectID, svc.Payload.Region, svc.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil

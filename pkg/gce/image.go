@@ -22,7 +22,7 @@ func NewImageService(project string, image *compute.Image) (*ImageService, error
 
 // Create an image.
 func (is *ImageService) Create() error {
-	op, err := is.GCE.service.Images.Insert(is.GCE.projectID, is.Payload).Do()
+	op, err := is.GCE.compute.Images.Insert(is.GCE.projectID, is.Payload).Do()
 	if err != nil {
 		return err
 	}
@@ -34,7 +34,7 @@ func (is *ImageService) Create() error {
 
 // Get an Image
 func (is *ImageService) Get() (*compute.Image, error) {
-	image, err := is.GCE.service.Images.Get(is.GCE.projectID, is.Payload.Name).Do()
+	image, err := is.GCE.compute.Images.Get(is.GCE.projectID, is.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil, nil
@@ -47,7 +47,7 @@ func (is *ImageService) Get() (*compute.Image, error) {
 
 // Delete an image
 func (is *ImageService) Delete() error {
-	op, err := is.GCE.service.Images.Delete(is.GCE.projectID, is.Payload.Name).Do()
+	op, err := is.GCE.compute.Images.Delete(is.GCE.projectID, is.Payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil

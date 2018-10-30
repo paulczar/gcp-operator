@@ -13,7 +13,7 @@ type TargetPool interface {
 
 // TargetPoolCreate an targetPool.
 func (gce *GCEClient) TargetPoolCreate(payload compute.TargetPool) error {
-	op, err := gce.service.TargetPools.Insert(gce.projectID, payload.Region, &payload).Do()
+	op, err := gce.compute.TargetPools.Insert(gce.projectID, payload.Region, &payload).Do()
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func (gce *GCEClient) TargetPoolCreate(payload compute.TargetPool) error {
 
 // TargetPoolGet an TargetPool
 func (gce *GCEClient) TargetPoolGet(payload compute.TargetPool) (*compute.TargetPool, error) {
-	targetPool, err := gce.service.TargetPools.Get(gce.projectID, payload.Region, payload.Name).Do()
+	targetPool, err := gce.compute.TargetPools.Get(gce.projectID, payload.Region, payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil, nil
@@ -38,7 +38,7 @@ func (gce *GCEClient) TargetPoolGet(payload compute.TargetPool) (*compute.Target
 
 // TargetPoolDelete an targetPool
 func (gce *GCEClient) TargetPoolDelete(payload compute.TargetPool) error {
-	op, err := gce.service.TargetPools.Delete(gce.projectID, payload.Region, payload.Name).Do()
+	op, err := gce.compute.TargetPools.Delete(gce.projectID, payload.Region, payload.Name).Do()
 	if err != nil {
 		if isHTTPErrorCode(err, 404) {
 			return nil

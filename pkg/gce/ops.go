@@ -31,19 +31,19 @@ func (gce *GCEClient) waitForOp(op *compute.Operation, loc string) error {
 
 func (gce *GCEClient) waitForGlobalOp(op *compute.Operation) error {
 	return waitForOp(op, func(operationName string) (*compute.Operation, error) {
-		return gce.service.GlobalOperations.Get(gce.projectID, operationName).Do()
+		return gce.compute.GlobalOperations.Get(gce.projectID, operationName).Do()
 	})
 }
 
 func (gce *GCEClient) waitForRegionOp(op *compute.Operation, region string) error {
 	return waitForOp(op, func(operationName string) (*compute.Operation, error) {
-		return gce.service.RegionOperations.Get(gce.projectID, region, operationName).Do()
+		return gce.compute.RegionOperations.Get(gce.projectID, region, operationName).Do()
 	})
 }
 
 func (gce *GCEClient) waitForZoneOp(op *compute.Operation, zone string) error {
 	return waitForOp(op, func(operationName string) (*compute.Operation, error) {
-		return gce.service.ZoneOperations.Get(gce.projectID, zone, operationName).Do()
+		return gce.compute.ZoneOperations.Get(gce.projectID, zone, operationName).Do()
 	})
 }
 
